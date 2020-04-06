@@ -29,10 +29,10 @@ from utils import save_checkpoint, load_checkpoint ,test_on_images
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--exper_name", default="Pix2Pix_train_lookbook", help="exp name")
+parser.add_argument("--exper_name", default="Pix2Pix_train_lookbook_crop_image_swap", help="exp name")
 parser.add_argument('--device', choices=['cpu', 'gpu'], default="gpu", help="available devices (CPU or GPU)")
 #parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU') 
-parser.add_argument('--dataset_dir', type=str, default="./lookbook/data/", help="dataset_dir for dataloader")
+parser.add_argument('--dataset_dir', type=str, default="./lookbook_crop/data/", help="dataset_dir for dataloader")
 parser.add_argument('--results_dir', type=str, default="results", help="output directory of the generated image")
 parser.add_argument('--save_checkpoints_dir', type=str, default="checkpoints", help="model storage directory")
 parser.add_argument('--load_checkpoints_dir', type=str, default="", help="model load directory")
@@ -249,7 +249,7 @@ for epoch in tqdm(range(args.n_epoches), desc="Epoches"):
 
         # Classifier output when fake image is input
         # detach and prevent the gradient from propagating to the generator through g_fake_img
-        d_fake = model_D(g_fake_img.detach(), after_image)
+        d_fake = model_D(pre_image,g_fake_img.detach())
         if (args.debug and n_print > 0):
             print("d_fake.size() :", d_fake.size())
         #----------------------------------------------------
@@ -285,7 +285,7 @@ for epoch in tqdm(range(args.n_epoches), desc="Epoches"):
             print("g_fake_img.size() :", g_fake_img.size())
         # Classifier output when fake image is input
         with torch.no_grad():
-            d_fake = model_D(g_fake_img, after_image)
+            d_fake = model_D(pre_image,g_fake_img)
             if (args.debug and n_print > 0):
                 print("d_fake.size() :", d_fake.size())
         #----------------------------------------------------
@@ -312,7 +312,7 @@ for epoch in tqdm(range(args.n_epoches), desc="Epoches"):
         train_hist['net_g_losses'].append(loss_G.item())
         net_g_losses.append(loss_G.item())
 #         print('%d,%d,%d',(steps,loss_D, loss_G)
-    if (epoch % 1 == 0):        
+    if (epoch % 5 == 0):        
         test_on_images(model_G,device,img_test_indexes,os.path.join(args.results_dir, args.exper_name),ds_test,epoch)
         print("saving best model after 2 epoch")
         save_checkpoint( model_G, device,  os.path.join(args.save_checkpoints_dir, args.exper_name, "G", "epoch_" + str(epoch) + '_G_final.pth'), epoch )
