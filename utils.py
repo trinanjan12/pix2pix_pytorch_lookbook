@@ -55,15 +55,18 @@ def test_on_images(model, device, img_indexes,results_path,dloader,epoch_num):
         after_image = inputs_test['target_image'].unsqueeze_(0).to(device)
         out_pred = model(pre_image).squeeze(0).cpu()
 
-        pre_image = np.transpose(pre_image[0].cpu().numpy(),(1,2,0))
+        # scale all pixels from [-1,1] to [0,1]
+        pre_image = pre_image[0].cpu().numpy()
+        pre_image = (pre_image + 1) / 2
+        pre_image = np.transpose(pre_image,(1,2,0))
+
         after_image = np.transpose(after_image[0].cpu().numpy(),(1,2,0))
+
         out_pred = out_pred.detach().cpu().numpy()
+        out_pred = (out_pred + 1) / 2
         out_pred = np.transpose(out_pred,(1,2,0))
 
         # scale all pixels from [-1,1] to [0,1]
-        pre_image = (pre_image + 1) / 2
-        after_image = after_image
-        out_pred = (out_pred + 1) / 2
-        vis = np.concatenate((after_image,pre_image, out_pred), axis=1)
+        vis = np.concatenate((pre_image,after_image,out_pred), axis=1)
         # plt.imshow(vis)
         Image.fromarray((vis * 255).astype('uint8')).save(os.path.join(results_path, 'epoch_' + str(epoch_num) + '_'  +str(i)+'.jpg'))
