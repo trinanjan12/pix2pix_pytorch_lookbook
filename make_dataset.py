@@ -26,7 +26,8 @@ class Map2AerialDataset(data.Dataset):
             [
                 transforms.Resize( (image_height, 2*image_width), interpolation=Image.LANCZOS ),
                 transforms.CenterCrop( size = (image_height, 2 * image_width) ),
-                transforms . ToTensor (),    # convert to Tensor
+                transforms.ToTensor (),
+                transforms.Normalize((0.5, ), (0.5, ))   # convert to Tensor
             ]
         )
 
@@ -97,7 +98,8 @@ class lookbookdataset(data.Dataset):
             [
                 transforms.Resize( (image_height, image_width), interpolation=Image.LANCZOS ),
                 transforms.CenterCrop( size = (image_height, image_width) ),
-                transforms.ToTensor(), 
+                transforms.ToTensor (),
+                transforms.Normalize((0.5, ), (0.5, ))   # convert to Tensor
             ]
         )
 

@@ -51,13 +51,19 @@ def test_on_images(model, device, img_indexes,results_path,dloader,epoch_num):
     results_path = os.path.join(results_path,'epoch_' + str(epoch_num))
     for i in img_indexes:
         inputs_test = dloader[i]
-        aerial_image_tsr = inputs_test['source_image'].unsqueeze_(0).to(device)
-        map_image_tsr = inputs_test['target_image'].unsqueeze_(0).to(device)
-        out_test = model(aerial_image_tsr).squeeze(0).cpu()
-        test_1 = np.transpose(aerial_image_tsr[0].cpu().numpy(),(1,2,0))
-        test_label_1 = np.transpose(map_image_tsr[0].cpu().numpy(),(1,2,0))
-        out_test = out_test.detach().cpu().numpy()
-        out_test = np.transpose(out_test,(1,2,0))
-        vis = np.concatenate((test_label_1,test_1, out_test), axis=1)
-#         plt.imshow(vis)
+        pre_image = inputs_test['source_image'].unsqueeze_(0).to(device)
+        after_image = inputs_test['target_image'].unsqueeze_(0).to(device)
+        out_pred = model(pre_image).squeeze(0).cpu()
+
+        pre_image = np.transpose(pre_image[0].cpu().numpy(),(1,2,0))
+        after_image = np.transpose(after_image[0].cpu().numpy(),(1,2,0))
+        out_pred = out_pred.detach().cpu().numpy()
+        out_pred = np.transpose(out_pred,(1,2,0))
+
+        # scale all pixels from [-1,1] to [0,1]
+        pre_image = (pre_image + 1) / 2
+        after_image = after_image
+        out_pred = (out_pred + 1) / 2
+        vis = np.concatenate((after_image,pre_image, out_pred), axis=1)
+        # plt.imshow(vis)
         Image.fromarray((vis * 255).astype('uint8')).save(os.path.join(results_path, 'epoch_' + str(epoch_num) + '_'  +str(i)+'.jpg'))
